@@ -13,9 +13,19 @@ class AdminRepository {
     }
   }
 
-  async getAdminById(id) {
+  async getById(id) {
     try {
-      const row = await Admin(Sequelize, DataTypes).findByPk(id);
+      const row = await Admin.findByPk(id);
+      return row;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  }
+
+  async getByEmail(email) {
+    try {
+      const row = await Admin.findOne({ where: { email } });
       return row;
     } catch (err) {
       console.error(err);

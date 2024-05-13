@@ -18,7 +18,6 @@ module.exports = (sequelize, DataTypes) => {
         marca: {
           type: DataTypes.STRING,
           allowNull: false,
-          unique: true,
         },
         qtd: {
           type: DataTypes.INTEGER,
@@ -34,8 +33,14 @@ module.exports = (sequelize, DataTypes) => {
         },
 
       },
-      { timestamps: false }
+      { timestamps: false, freezeTableName: true }
     );
+    Produto.associate = (models) => {
+      Produto.belongsToMany(models.Venda, {
+        through: 'produtoVenda',
+        foreignKey: 'produtoId'
+      });
+    };
     return Produto;
   };
   
