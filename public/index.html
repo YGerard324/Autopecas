@@ -26,10 +26,10 @@
                             <th>Quantidade</th>
                             <th>Custo</th>
                             <th>Valor de Venda</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="produtosTableBody">
-                        <!-- Aqui vão os produtos -->
                     </tbody>
                 </table>
             </div>
@@ -81,20 +81,25 @@
                                 <td>${produto.qtd}</td>
                                 <td>${produto.custo}</td>
                                 <td>${produto.valorVenda}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-editar" data-id="${produto.id}">Editar</button>
+                                    <button class="btn btn-danger btn-excluir" data-id="${produto.id}">Excluir</button>
+                                </td>
                             </tr>
                         `);
                     });
+                    // Adiciona os eventos para os botões de editar e excluir
+                    $(".btn-editar").click(editarProduto);
+                    $(".btn-excluir").click(excluirProduto);
                 });
             }
 
-            // Chamada inicial para carregar produtos
             carregarProdutos();
 
-            // Submissão do formulário
-            $(document).ready(function() {
+            // Função para submeter o formulário de cadastro
             $("#produtoForm").submit(function(event) {
                 event.preventDefault();
-            
+                
                 var formData = {
                     name: document.getElementById('name').value,
                     marca: document.getElementById('marca').value,
@@ -102,9 +107,9 @@
                     custo: document.getElementById('custo').value,
                     valorVenda: document.getElementById('valorVenda').value
                 };
-            
+                
                 console.log("Dados do formulário:", formData);
-
+            
                 fetch("/produto/create", {
                     method: 'POST',
                     headers: {
@@ -115,6 +120,8 @@
                 .then(response => {
                     if (response.ok) {
                         console.log('Dados enviados com sucesso!', formData);
+                        $("#produtoForm")[0].reset();
+                        carregarProdutos();
                     } else {
                         console.error('Erro ao enviar os dados.', formData);
                     }
@@ -122,18 +129,93 @@
                 .catch(error => {
                     console.error('Erro:', error);
                 });
-            
-                // $.post("/produto/create", formData, function(data) {
-                //     console.log("Dados do produto enviados para o servidor:", formData);
-                //     console.log("Dados do produto recebidos no servidor:", data);
-                //      carregarProdutos();
-                //      $("#produtoForm")[0].reset();
-                // });
             });
-            carregarProdutos();
-            $("#produtoForm")[0].reset();
+            
+            // Função para editar um produto
+            function editarProduto() {
+                var id = $(this).data("id");
+                console.log("Editar produto com ID:", id);
+                
+                if (!id) {
+                    console.error('ID do produto não encontrado.');
+                    return; // Aborta a operação se o ID não estiver presente
+                }
+                
+                fetch("/produto/" + id)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erro ao obter os dados do produto');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Preencher campos do formulário com os dados do produto
+                        document.getElementById('name').value = data.name;
+                        document.getElementById('marca').value = data.marca;
+                        document.getElementById('qtd').value = data.qtd;
+                        document.getElementById('custo').value = data.custo;
+                        document.getElementById('valorVenda').value = data.valorVenda;
+                    
+                        // Submissão do formulário de edição
+                        document.getElementById('produtoForm').onsubmit = function(event) {
+                            event.preventDefault();
+                        
+                            var formData = {
+                                name: document.getElementById('name').value,
+                                marca: document.getElementById('marca').value,
+                                qtd: document.getElementById('qtd').value,
+                                custo: document.getElementById('custo').value,
+                                valorVenda: document.getElementById('valorVenda').value
+                            };
+                        
+                            fetch("/produto/" + id, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(formData)
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    console.log('Produto atualizado com sucesso!');
+                                    document.getElementById('produtoForm').reset(); // Limpa o formulário
+                                    carregarProdutos(); // Recarrega a lista de produtos
+                                } else {
+                                    console.error('Erro ao atualizar o produto.');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Erro:', error);
+                            });
+                        };
+                    })
+                    .catch(error => {
+                        console.error('Erro ao obter dados do produto:', error);
+                    });
+            }
+
+
+
+            function excluirProduto() {
+                var id = $(this).data("id");
+                console.log("Excluir produto com ID:", id);
+            
+                fetch("http://localhost:3000/produto/" + id, {
+                    method: 'DELETE',
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Produto excluído com sucesso!');
+                        carregarProdutos();
+                    } else {
+                        console.error('Erro ao excluir o produto.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                });
+            }
         });
-    });
     </script>
 </body>
 </html>

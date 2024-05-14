@@ -11,12 +11,12 @@ class ProdutoService {
       const novoProduto = await this.produtoRepository.add(produtoData);
       return novoProduto;
     } catch (err) {
-      console.error(err);
+      console.error(err);ss
       throw err;
     }
   }
 
-  async getById(id) {
+  async getProdutoById(id) {
     try {
       const produto = await this.produtoRepository.getProdutoById(id);
       return produto;
