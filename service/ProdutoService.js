@@ -5,8 +5,9 @@ class ProdutoService {
     this.produtoRepository = new ProdutoRepository();
   }
 
-  async create(produtoData) {
+  async add(produtoData) {
     try {
+      console.log("Dados do produto recebidos no serviço:", produtoData);
       const novoProduto = await this.produtoRepository.add(produtoData);
       return novoProduto;
     } catch (err) {
@@ -15,7 +16,7 @@ class ProdutoService {
     }
   }
 
-  async getProdutoById(id) {
+  async getById(id) {
     try {
       const produto = await this.produtoRepository.getProdutoById(id);
       return produto;

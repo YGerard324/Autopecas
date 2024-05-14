@@ -5,6 +5,7 @@ class ProdutoRepository {
 
   async add(produto) {
     try {
+      console.log("Dados do produto recebidos no repository:", produto);
       const row = await Produto.create(produto);
       return row;
     } catch (err) {
@@ -13,7 +14,7 @@ class ProdutoRepository {
     }
   }
 
-  async getById(id) {
+  async getProdutoById(id) {
     try {
       const row = await Produto.findByPk(id);
       return row;

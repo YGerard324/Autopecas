@@ -6,7 +6,8 @@ const produtoService = new ProdutoService();
 
 router.post('/create', async (req, res) => {
   try {
-    const novoProduto = await produtoService.create(req.body);
+    console.log("Dados do produto recebidos no servidor:", req.body);
+    const novoProduto = await produtoService.add(req.body);
     res.json(novoProduto);
   } catch (error) {
     res.status(500).json({ error: error.message });
