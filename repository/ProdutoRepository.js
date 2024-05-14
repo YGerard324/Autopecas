@@ -36,14 +36,12 @@ class ProdutoRepository {
 
   async update(id, novoProdutoData) {
     try {
-      const [rowsAffected, updatedRows] = await Produto.update(novoProdutoData, {
-        where: { id },
-        returning: true,
-      });
-      if (rowsAffected === 0) {
+      const produto = await Produto.findOne({ where: { id } });
+      if (!produto) {
         throw new Error("Produto não encontrado");
       }
-      return updatedRows[0];
+      await Produto.update(novoProdutoData, { where: { id } });
+      return novoProdutoData;
     } catch (err) {
       console.error(err);
       throw err;

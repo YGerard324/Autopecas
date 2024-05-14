@@ -68,7 +68,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Função para carregar os produtos
             function carregarProdutos() {
                 $.get("http://localhost:3000/produto", function(data) {
                     $("#produtosTableBody").empty();
@@ -88,7 +87,6 @@
                             </tr>
                         `);
                     });
-                    // Adiciona os eventos para os botões de editar e excluir
                     $(".btn-editar").click(editarProduto);
                     $(".btn-excluir").click(excluirProduto);
                 });
@@ -96,7 +94,6 @@
 
             carregarProdutos();
 
-            // Função para submeter o formulário de cadastro
             $("#produtoForm").submit(function(event) {
                 event.preventDefault();
                 
@@ -107,7 +104,7 @@
                     custo: document.getElementById('custo').value,
                     valorVenda: document.getElementById('valorVenda').value
                 };
-                
+                console.log('fui chamado de novo', formData);
                 console.log("Dados do formulário:", formData);
             
                 fetch("/produto/create", {
@@ -130,70 +127,74 @@
                     console.error('Erro:', error);
                 });
             });
-            
-            // Função para editar um produto
+        
             function editarProduto() {
-                var id = $(this).data("id");
-                console.log("Editar produto com ID:", id);
-                
-                if (!id) {
-                    console.error('ID do produto não encontrado.');
-                    return; // Aborta a operação se o ID não estiver presente
-                }
-                
-                fetch("/produto/" + id)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Erro ao obter os dados do produto');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        // Preencher campos do formulário com os dados do produto
-                        document.getElementById('name').value = data.name;
-                        document.getElementById('marca').value = data.marca;
-                        document.getElementById('qtd').value = data.qtd;
-                        document.getElementById('custo').value = data.custo;
-                        document.getElementById('valorVenda').value = data.valorVenda;
-                    
-                        // Submissão do formulário de edição
-                        document.getElementById('produtoForm').onsubmit = function(event) {
-                            event.preventDefault();
-                        
-                            var formData = {
-                                name: document.getElementById('name').value,
-                                marca: document.getElementById('marca').value,
-                                qtd: document.getElementById('qtd').value,
-                                custo: document.getElementById('custo').value,
-                                valorVenda: document.getElementById('valorVenda').value
-                            };
-                        
-                            fetch("/produto/" + id, {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify(formData)
-                            })
-                            .then(response => {
-                                if (response.ok) {
-                                    console.log('Produto atualizado com sucesso!');
-                                    document.getElementById('produtoForm').reset(); // Limpa o formulário
-                                    carregarProdutos(); // Recarrega a lista de produtos
-                                } else {
-                                    console.error('Erro ao atualizar o produto.');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Erro:', error);
-                            });
-                        };
-                    })
-                    .catch(error => {
-                        console.error('Erro ao obter dados do produto:', error);
-                    });
-            }
+    var id = $(this).data("id");
+    console.log("Editar produto com ID:", id);
 
+    if (!id) {
+        console.error('ID do produto não encontrado.');
+        return;
+    }
+
+    fetch("/produto/" + id)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao obter os dados do produto');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Preencher campos do formulário com os dados do produto
+            document.getElementById('name').value = data.name;
+            document.getElementById('marca').value = data.marca;
+            document.getElementById('qtd').value = data.qtd;
+            document.getElementById('custo').value = data.custo;
+            document.getElementById('valorVenda').value = data.valorVenda;
+
+
+            // Submissão do formulário de edição
+            document.getElementById('produtoForm').onsubmit = function(event) {
+                event.preventDefault();
+
+                var formData = {
+                    name: document.getElementById('name').value,
+                    marca: document.getElementById('marca').value,
+                    qtd: document.getElementById('qtd').value,
+                    custo: document.getElementById('custo').value,
+                    valorVenda: document.getElementById('valorVenda').value
+                };
+                console.log('Dados do formulário:', formData);
+
+                // Remova o ID do formData
+                delete formData.id;
+
+                fetch("/produto/" + id, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (response.ok) {
+
+                        console.log('Produto atualizado com sucesso!');
+                        document.getElementById('produtoForm').reset(); // Limpa o formulário
+                        carregarProdutos(); // Recarrega a lista de produtos
+                    } else {
+                        console.error('Erro ao atualizar o produto.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                });
+            };
+        })
+        .catch(error => {
+            console.error('Erro ao obter dados do produto:', error);
+        });
+}
 
 
             function excluirProduto() {
