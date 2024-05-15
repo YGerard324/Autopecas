@@ -5,6 +5,7 @@ class VendaRepository {
 
   async create(produtos) {
     try {
+        console.log("Dados da venda recebidos no repository:", produtos);
         const novaVenda = await Venda.create({ finalizada: false });
         for (const produto of produtos) {
             const produtoDB = await Produto.findByPk(produto.produtoId);

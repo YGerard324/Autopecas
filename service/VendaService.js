@@ -7,6 +7,7 @@ class VendaService {
 
   async createSale(produtos) {
     try {
+      console.log("Dados da venda recebidos no serviço:", produtos);
       const novaVenda = await this.vendaRepository.create(produtos);
       return novaVenda;
     } catch (err) {

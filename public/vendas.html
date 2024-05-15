@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUTO PARTS</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src='https://cdn-icons-png.flaticon.com/512/11809/11809845.png' width="30" height="30" class="d-inline-block align-top" alt="">
+                    AUTO PARTS
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://localhost:3000/vendas"><i class="fa fa-shopping-cart"></i> Venda</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://localhost:3000/products"><i class="fa fa-plus"></i> Cadastrar Produto</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="http://localhost:3000/calendar"><i class="fa fa-calendar"></i> Calendário</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <!-- FORM DE VENDAS -->
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 class="mb-4">Ponto de Venda</h1>
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2>Produtos Disponíveis</h2>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Marca</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor de Venda</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="produtosTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <h2>Carrinho</h2>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Quantidade</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="carrinhoTableBody">
+                            </tbody>
+                        </table>
+                        <h3>Total: <span id="totalValue">R$ 0.00</span></h3>
+                        <button id="finalizarVendaBtn" class="btn btn-primary">Finalizar Venda</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- FIM FORM DE VENDAS -->
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var carrinho = [];
+
+            function carregarProdutos() {
+                $.get("http://localhost:3000/produto", function(data) {
+                    $("#produtosTableBody").empty();
+                    data.forEach(function(produto) {
+                        $("#produtosTableBody").append(`
+                            <tr>
+                                <td>${produto.id}</td>
+                                <td>${produto.name}</td>
+                                <td>${produto.marca}</td>
+                                <td>${produto.qtd}</td>
+                                <td>R$ ${produto.valorVenda}</td>
+                                <td>
+                                    <button class="btn btn-success btn-add" data-id="${produto.id}">Adicionar</button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                    $(".btn-add").click(adicionarAoCarrinho);
+                });
+            }
+
+            carregarProdutos();
+
+            function adicionarAoCarrinho() {
+                var id = $(this).data("id");
+                var produto = carrinho.find(item => item.id === id);
+
+                if (produto) {
+                    produto.quantidade++;
+                } else {
+                    var nome = $(this).closest("tr").find("td:eq(1)").text();
+                    var valorVenda = parseFloat($(this).closest("tr").find("td:eq(4)").text().replace("R$ ", ""));
+                    produto = { id: id, nome: nome, valorVenda: valorVenda, quantidade: 1 };
+                    carrinho.push(produto);
+                }
+
+                atualizarCarrinho();
+            }
+
+            function atualizarCarrinho() {
+                $("#carrinhoTableBody").empty();
+                var total = 0;
+                carrinho.forEach(function(item) {
+                    var subtotal = item.valorVenda * item.quantidade;
+                    total += subtotal;
+                    $("#carrinhoTableBody").append(`
+                        <tr>
+                            <td>${item.nome}</td>
+                            <td>${item.quantidade}</td>
+                            <td>R$ ${subtotal.toFixed(2)}</td>
+                        </tr>
+                    `);
+                });
+                $("#totalValue").text("R$ " + total.toFixed(2));
+            }
+
+            $("#finalizarVendaBtn").click(function() {
+                if (carrinho.length === 0) {
+                    alert("Adicione pelo menos um produto ao carrinho.");
+                    return;
+                }
+            
+                const produtosParaVenda = carrinho.map(item => ({ produtoId: item.id, qtd: item.quantidade }));
+            
+                $.ajax({
+                    url: "http://localhost:3000/venda/create",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(produtosParaVenda),
+                    success: function(response) {
+                        alert("Venda finalizada com sucesso!");
+                        carrinho = [];
+                        atualizarCarrinho();
+                        carregarProdutos();
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Erro ao finalizar a venda: " + error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
